@@ -1,4 +1,4 @@
-package com.chen.sunnyweather.ui.place.pojo;
+package com.chen.sunnyweather.logic.model.place;
 
 /**
  * Place的经纬度

@@ -1,4 +1,4 @@
-package com.chen.sunnyweather.ui.place.pojo;
+package com.chen.sunnyweather.logic.model.place;
 
 /**
  * 代表一个城市中的某个地域

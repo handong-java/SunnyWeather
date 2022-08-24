@@ -1,4 +1,4 @@
-package com.chen.sunnyweather.ui.place.pojo;
+package com.chen.sunnyweather.logic.model.place;
 
 import java.util.List;
 
@@ -12,6 +12,9 @@ public class PlaceResponse {
     public PlaceResponse(String status, List<Place> places) {
         this.status = status;
         this.places = places;
+    }
+
+    public PlaceResponse() {
     }
 
     public String getStatus() {

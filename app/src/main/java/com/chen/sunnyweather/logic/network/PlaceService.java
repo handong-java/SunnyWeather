@@ -1,7 +1,7 @@
 package com.chen.sunnyweather.logic.network;
 
 import com.chen.sunnyweather.MyApplication;
-import com.chen.sunnyweather.ui.place.pojo.PlaceResponse;
+import com.chen.sunnyweather.logic.model.place.PlaceResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
