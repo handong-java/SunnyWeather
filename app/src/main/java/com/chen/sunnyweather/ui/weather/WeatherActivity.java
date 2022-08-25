@@ -1,12 +1,20 @@
 package com.chen.sunnyweather.ui.weather;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -38,7 +46,10 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView ultravioletText;
     private TextView carWashingText;
     private ScrollView weatherLayout;
-    private WeatherViewModel weatherViewModel;
+    public WeatherViewModel weatherViewModel;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private DrawerLayout drawerLayout;
+    private Button navBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,9 +79,45 @@ public class WeatherActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "无法获取天气信息", Toast.LENGTH_SHORT).show();
             }
+            swipeRefreshLayout.setRefreshing(false);//收到请求结果后需要关闭刷新图标
         });
-        //触发网络请求
+        swipeRefreshLayout.setColorSchemeResources(R.color.purple_700);
+        refreshWeather();//跳转过来的时候自动刷新一次
+        //下拉刷新触发网络请求
+        swipeRefreshLayout.setOnRefreshListener(this::refreshWeather);
+
+        //滑动菜单
+        navBtn.setOnClickListener(v->{
+            drawerLayout.openDrawer(GravityCompat.START);//打开方向位置
+        });
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+
+            //关闭的时候将输入法关闭
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                manager.hideSoftInputFromWindow(drawerView.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+    }
+
+    public void refreshWeather() {
         weatherViewModel.refreshWeather(weatherViewModel.lng, weatherViewModel.lat);
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     private void initView() {
@@ -86,6 +133,9 @@ public class WeatherActivity extends AppCompatActivity {
         ultravioletText = findViewById(R.id.ultravioletText);
         carWashingText = findViewById(R.id.carWashingText);
         weatherLayout = findViewById(R.id.weatherLayout);
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navBtn = findViewById(R.id.navBtn);
     }
 
     private void showWeatherInfo(Weather weather) {

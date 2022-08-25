@@ -1,8 +1,10 @@
 package com.chen.sunnyweather.ui.place;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +19,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chen.sunnyweather.MainActivity;
 import com.chen.sunnyweather.R;
+import com.chen.sunnyweather.logic.model.place.Place;
+import com.chen.sunnyweather.ui.weather.WeatherActivity;
 
 
 public class PlaceFragment extends Fragment {
-    private PlaceViewModel placeViewModel;
+    public PlaceViewModel placeViewModel;
     private PlaceAdapter adapter;
     private EditText searchPlaceEdit;
     private ImageView placeBG;
@@ -49,6 +54,22 @@ public class PlaceFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new PlaceAdapter(this,placeViewModel.placeList);
         recyclerView.setAdapter(adapter);
+
+        //如果保存了Place那么直接跳转到WeatherActivity即可
+        //此时context为null
+        if (placeViewModel.isSavedPlace() && getActivity() instanceof MainActivity){
+            Place place = placeViewModel.getPlace();
+            //获取到存储的place就跳转WeatherActivity
+            Intent intent = new Intent(this.getContext(), WeatherActivity.class);
+            intent.putExtra("location_lng",place.getLocation().getLng());
+            intent.putExtra("location_lat",place.getLocation().getLat());
+            intent.putExtra("place_name",place.getName());
+            startActivity(intent);
+            if (getActivity()!=null) {
+                getActivity().finish();
+            }
+            return;
+        }
 
         searchPlaceEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,5 +108,20 @@ public class PlaceFragment extends Fragment {
                 Toast.makeText(getActivity(), "查询结果为空,请更换城市", Toast.LENGTH_SHORT).show();
             }
         });
+        /*placeViewModel.getPlaceLiveData.observe(getViewLifecycleOwner() ,place->{
+            //获取到存储的place就跳转WeatherActivity
+            Intent intent = new Intent(this.getContext(), WeatherActivity.class);
+            intent.putExtra("location_lng",place.getLocation().getLng());
+            intent.putExtra("location_lat",place.getLocation().getLat());
+            intent.putExtra("place_name",place.getName());
+            startActivity(intent);
+            if (getActivity()!=null) {
+                getActivity().finish();
+            }
+        });*/
+        placeViewModel.savePlaceLiveData.observe(getViewLifecycleOwner(),place->{
+            Log.d("PlaceFragment",place.toString());//保存成功
+        });
+
     }
 }

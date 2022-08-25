@@ -1,5 +1,6 @@
 package com.chen.sunnyweather.ui.place;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chen.sunnyweather.R;
@@ -20,11 +23,12 @@ import java.util.List;
  * PlaceRecycleView的适配器
  */
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.ViewHolder> {
-    private final Fragment fragment;
+    private final PlaceFragment placeFragment;
     private final List<Place> placeList;
 
-    public PlaceAdapter(Fragment fragment, List<Place> placeList) {
-        this.fragment = fragment;
+    //修改为PlaceFragment以便得到PlaceViewModel
+    public PlaceAdapter(PlaceFragment placeFragment, List<Place> placeList) {
+        this.placeFragment = placeFragment;
         this.placeList = placeList;
     }
 
@@ -36,14 +40,26 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.ViewHolder> 
         viewHolder.itemView.setOnClickListener(v->{
             int position = viewHolder.getAbsoluteAdapterPosition();
             Place place = placeList.get(position);
-            Intent intent = new Intent(parent.getContext(), WeatherActivity.class);
-            intent.putExtra("location_lng",place.getLocation().getLng());
-            intent.putExtra("location_lat",place.getLocation().getLat());
-            intent.putExtra("place_name",place.getName());
-            fragment.startActivity(intent);
-            if (fragment.getActivity()!=null) {
-                fragment.getActivity().finish();//销毁当前绑定的MainActivity，和fragment自己，跳转到WeatherActivity后不再需要之前的Activity
+            Activity activity =  placeFragment.getActivity();
+            //如果已经在WeatherActivity就不需要跳转了
+            if (activity instanceof WeatherActivity){
+                DrawerLayout drawerLayout = activity.findViewById(R.id.drawerLayout);
+                drawerLayout.closeDrawers();
+                ((WeatherActivity)activity).weatherViewModel.lng = place.getLocation().getLng();
+                ((WeatherActivity)activity).weatherViewModel.lat = place.getLocation().getLat();
+                ((WeatherActivity)activity).weatherViewModel.placeName = place.getName();
+                ((WeatherActivity)activity).refreshWeather();
+            } else {
+                Intent intent = new Intent(parent.getContext(), WeatherActivity.class);
+                intent.putExtra("location_lng",place.getLocation().getLng());
+                intent.putExtra("location_lat",place.getLocation().getLat());
+                intent.putExtra("place_name",place.getName());
+                placeFragment.startActivity(intent);
+                if (placeFragment.getActivity()!=null) {
+                    placeFragment.getActivity().finish();//销毁当前绑定的MainActivity，和fragment自己，跳转到WeatherActivity后不再需要之前的Activity
+                }
             }
+            placeFragment.placeViewModel.savePlace(place);//保存选中城市
         });
         return viewHolder;
     }

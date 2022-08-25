@@ -31,12 +31,12 @@ public class SunnyWeatherNetwork {
     //获得网络请求的动态代理
     private final PlaceService placeService = ServiceCreator.getInstance().create(PlaceService.class);
     private PlaceResponse placeResponse;
-    public final static MutableLiveData<List<Place>> placeLiveData = new MutableLiveData<>();//
+    public final static MutableLiveData<List<Place>> placeLiveData = Repository.placeLiveData;//
 
     private final WeatherService weatherService = ServiceCreator.getInstance().create(WeatherService.class);
     private RealtimeResponse realtimeResponse;
     private DailyResponse dailyResponse;
-    public final static MutableLiveData<Weather> weatherLiveData = new MutableLiveData<>();
+    public final static MutableLiveData<Weather> weatherLiveData = Repository.weatherLiveData;
 
 
 

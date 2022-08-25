@@ -3,6 +3,7 @@ package com.chen.sunnyweather.logic;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.chen.sunnyweather.logic.dao.PlaceDao;
 import com.chen.sunnyweather.logic.model.Weather;
 import com.chen.sunnyweather.logic.model.daily.Daily;
 import com.chen.sunnyweather.logic.model.daily.DailyResponse;
@@ -15,13 +16,17 @@ import java.util.List;
 /**
  * 单实例的仓库类
  * 职责：判断请求的数据应该从网络中请求，还是从本地仓库缓存中获取
- * 这里简单起见就不设置本地缓存了，直接请求网络
  */
 public class Repository {
-    private static final SunnyWeatherNetwork sunnyWeatherNetwork = SunnyWeatherNetwork.getInstance();
-    //Place
+    //Places
     //声明为static是否会内存泄漏
-    public final static MutableLiveData<List<Place>> placeLiveData = SunnyWeatherNetwork.placeLiveData;//暴露给网络请求的响应逻辑中使用
+    public final static MutableLiveData<List<Place>> placeLiveData = new MutableLiveData<>();
+    public final static MutableLiveData<Weather> weatherLiveData = new MutableLiveData<>();
+    public static MutableLiveData<Place> getPlaceLiveData = new MutableLiveData<>();
+    public static MutableLiveData<Place> savePlaceLiveData = new MutableLiveData<>();
+
+    //注意不能先获取SunnyWeatherNetwork，否则加载这个类的时候static属性初始化为空
+    private static final SunnyWeatherNetwork sunnyWeatherNetwork = SunnyWeatherNetwork.getInstance();
 
     public static LiveData<List<Place>> searchPlaces(String query){
         try {
@@ -32,11 +37,10 @@ public class Repository {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return placeLiveData;
+        return placeLiveData;//会直接返回，不会先处理子线程逻辑
     }
 
     //weather
-    public final static MutableLiveData<Weather> weatherLiveData = SunnyWeatherNetwork.weatherLiveData;
     public static LiveData<Weather> refreshWeather(String lng ,String lat){
         try{
             new Thread(()->{
@@ -49,6 +53,36 @@ public class Repository {
         }
         return weatherLiveData;
     }
+
+    //从本地数据库中操作Place
+        //
+    public static LiveData<Place> savePlace(Place place){
+        try {
+            new Thread(()->{
+                PlaceDao.savePlace(place);
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return savePlaceLiveData;
+    }
+
+    /*public static LiveData<Place> getPlace(){
+        try {
+            new Thread(PlaceDao::getPlace).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return getPlaceLiveData;
+    }*/
+    public static Place getPlace(){
+        return PlaceDao.getPlace();
+    }
+    public static boolean isSavedPlace(){
+        return PlaceDao.isSavedPlace();
+    }
+
+
 
     private Repository() {
     }

@@ -6,7 +6,7 @@ import android.content.Context;
 
 /**
  * 一个提供全局context的工具类。
- * 代替系统的Application作为主应用的启动类
+ * 代替系统的Application作为主应用的启动类,注意在Manifest中设置为默认启动的Application
  */
 public class MyApplication extends Application {
     @SuppressLint("StaticFieldLeak")
