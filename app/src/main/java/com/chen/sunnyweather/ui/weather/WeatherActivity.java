@@ -101,7 +101,7 @@ public class WeatherActivity extends AppCompatActivity {
 
             }
 
-            //关闭的时候将输入法关闭
+            //关闭的时候将输入法一起关闭
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
                 InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
